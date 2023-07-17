@@ -1,0 +1,182 @@
+﻿@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    ViewData["Title"] = "ChonGhe";
+    Layout = "~/Views/Shared/_LayoutMovefix.cshtml";
+}
+
+@using Microsoft.AspNetCore.Http
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+
+<section class="movie-details-area" data-background="../MoveFix/img/bg/movie_details_bg.jpg" style="background-image: url(&quot;img/bg/movie_details_bg.jpg&quot;);">
+
+    <div class="container mt-150">
+        <div class="row">
+            <div class="col-12 screen">
+                Màn Hình
+            </div>
+        </div>
+    </div>
+
+    <div class="container mt-150">
+        <div id="ghe" class="row gap-5">
+        </div>
+
+    </div>
+
+    <section class="newsletter-area newsletter-bg mt-50" data-background="../MoveFix/img/bg/newsletter_bg.jpg">
+        <div class="container">
+            <div class="newsletter-inner-wrap">
+                <div id="hoadon" class="row align-items-center">
+                </div>
+            </div>
+        </div>
+    </section>
+</section>
+
+
+
+
+<script>
+
+
+
+    let gheBtns
+
+    let gheDaChons = []
+
+    let maGheDaChons = []
+
+    let tongTien = 0
+
+
+    const getTrangThaiGhe = (maSuatChieu) => {
+
+
+        var str = ''
+        $.ajax({
+            type: 'GET',
+
+            url: `https://localhost:7142/api/phimapi/trangthaighe?masuatchieu=${maSuatChieu}`,
+
+            dataType: 'json',
+
+            success: function (data) {
+                console.log(data)
+                $.each(data, function (key, val) {
+
+
+                    str += `<div class="col-3 d-flex justify-content-center">
+                                                            <button id=${val.maGhe} ${val.trangThai == 2 ? 'disabled' : ''} class="seat mb-10 ${val.trangThai == 1 ? '' : 'booked'}">
+                                                                ${val.tenGhe}
+                                                            </button>
+                                                        </div>`
+                });
+                $('#ghe').html(str);
+                gheBtns = document.querySelectorAll('.seat');
+                gheBtns.forEach((item) => {
+                    item.onclick = (e) => {
+                        e.target.classList.toggle("selected")
+                        if (e.target.classList.contains("selected")) {
+                            gheDaChons.push(e.target.innerText)
+                            maGheDaChons.push(e.target.id)
+                        } else {
+                            gheDaChons = gheDaChons.filter((item) => item != e.target.innerText)
+                            maGheDaChons = maGheDaChons.filter((item) => item != e.target.id)
+                        }
+                        thongTinHoaDon('@ViewBag.maSuatChieu')
+                        console.log(gheDaChons);
+                    }
+                })
+            },
+            error: function (xhr) {
+                //alert(xhr.responsetext);
+                console.log(xhr)
+            }
+        })
+    }
+
+    const thongTinHoaDon = (maSuatChieu) => {
+        let str = ''
+        $.ajax({
+            type: 'GET',
+
+            url: `https://localhost:7142/api/phimapi/thongtinhoadon?masuatchieu=${maSuatChieu}`,
+
+            dataType: 'json',
+
+            success: function (val) {
+                console.log(val)
+
+
+
+                tongTien = val.donGiaPhim * gheDaChons.length;
+
+
+
+                str += `<div class="col-lg-5">
+                                                <div class="newsletter-content">
+                                                    <h4>Phim: ${val.tenPhim}</h4>
+                                                    <p>Rạp Chiếu: ${val.rapChieu}</p>
+                                                    <p>Phòng Chiếu: ${val.phongChieu}</p>
+                                                    <p>Ngày Chiếu: ${val.ngayChieu}</p>
+                                                    <p>Giờ Bắt Đầu: ${val.gioBatDau}</p>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-5">
+                                                <div class="newsletter-content">
+                                                        <h4>Đơn Giá: ${val.donGiaPhim * gheDaChons.length}</h4>
+                                                    <p>Ghế: ${gheDaChons}</p>
+                                                        <p>Số Lượng: ${gheDaChons.length} </p>
+                                                </div>
+                                            </div>
+                                                <div class="col-lg-2">
+                                                    <div class="newsletter-content">
+                                                        <button onclick="datVe()" ${gheDaChons.length <= 0 ? 'disabled' : ''} class="payment">Đặt Vé</button>
+                                                    </div>
+                                                </div>`
+
+                $('#hoadon').html(str);
+            },
+            error: function (xhr) {
+                console.log(xhr)
+            }
+        })
+    }
+
+    const datVe = () => {
+        $.ajax({
+            url: `https://localhost:7142/api/phimapi?maKh=${'@HttpContextAccessor.HttpContext.Session.GetString("maKH")'}&maSuatChieu=${'@ViewBag.maSuatChieu'}&thoiGian=${moment(new Date()).format('YYYY/MM/DD')}&soLuongVe=${gheDaChons.length}&tongTien=${tongTien}`,
+            type: 'POST',
+            //data: jQuery.param({ maKh: 'KH01', maSuatChieu: '@ViewBag.maSuatChieu', thoiGian: new Date(), soLuongVe: gheDaChons.length, tongTien: tongTien }),
+            contentType: 'json',
+            success: function (response) {
+                console.log(response)
+                $.ajax({
+                    url: `https://localhost:7142/api/phimapi?maghe=${maGheDaChons}&masuatChieu=${'@ViewBag.maSuatChieu'}`,
+                    type: 'PUT',
+                    //data: jQuery.param({ maGhe: gheDaChons, maSuatChieu: "@ViewBag.maSuatChieu" }),
+                    contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+                    success: function (response) {
+                        //alert(response.status);
+                        location.reload();
+                    },
+                    error: function () {
+                        alert("error put");
+                    }
+                })
+
+                alert("Đặt vé thành công");
+            },
+            error: function (e) {
+                console.log(e)
+                alert(e);
+            }
+        })
+    }
+
+    getTrangThaiGhe('@ViewBag.maSuatChieu')
+
+    thongTinHoaDon('@ViewBag.maSuatChieu')
+
+
+</script>

@@ -1,0 +1,157 @@
+﻿@{
+    ViewData["Title"] = "ChiTietPhim";
+    Layout = "~/Views/Shared/_LayoutMovefix.cshtml";
+}
+
+@model Phim
+@using Microsoft.AspNetCore.Http
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+
+
+<section class="movie-details-area" data-background="../MoveFix/img/bg/movie_details_bg.jpg" style="background-image: url(&quot;img/bg/movie_details_bg.jpg&quot;);">
+    <div class="container">
+        <div class="row align-items-center position-relative">
+            <div class="col-xl-3 col-lg-4">
+                <div class="movie-details-img">
+                    <img width="303px" height="430px" src=@Url.Content("../imagesPhim/" + Model.Anh) alt="">
+                    <a href="https://www.youtube.com/watch?v=R2gbPxeNk2E" class="popup-video"><img src="img/images/play_icon.png" alt=""></a>
+                </div>
+            </div>
+            <div class="col-xl-6 col-lg-8">
+                <div class="movie-details-content">
+                    <h5>Nôi dung phim</h5>
+                    <h2>@Model.TenPhim</h2>
+                    <div class="banner-meta">
+                        <ul>
+                            <li class="quality">
+                                <span>Đạo Diễn: @Model.DaoDien</span>
+                                <span>hd</span>
+                            </li>
+                            <li class="category">
+                                @*                                @foreach(var item in ViewBag.theLoais)
+                                {
+                                <a href="#">@item.ToString()</a>
+                                }*@
+
+                            </li>
+                            <li class="release-time">
+                                <span><i class="far fa-calendar-alt"></i> @Model.ThoiGianKhoiChieu.Value.ToString("dd/MM/yyyy")</span>
+                                <span><i class="far fa-clock"></i> @Model.ThoiLuong min</span>
+                                <span><i class="far fa-star"></i>  @Math.Round(@Model.DiemVote.Value,2)</span>
+                                <span><i class="far fa-clock"></i> @Model.SoLuongVote</span>
+                            </li>
+                            <li>
+                                <input type="number" id="danhgia" />
+                                <button onclick="vote('@Model.MaPhim')">Đánh giá</button>
+                            </li>
+                        </ul>
+                    </div>
+                    <p>
+                        @Model.MoTa
+                    </p>
+                    <div class="movie-details-prime">
+                        <ul>
+                            <li class="share"><a href="#"><i class="fas fa-share-alt"></i> Share</a></li>
+
+                            <li class="watch"><a href="https://www.youtube.com/watch?v=R2gbPxeNk2E" class="btn popup-video"><i class="fas fa-play"></i> Trailer</a></li>
+                            <li class="watch"><a asp-action="DatVe" asp-route-maphim="@Model.MaPhim" class="btn"><i class="fas fa-play"></i> Đặt vé</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section>
+    <input type="text" id="cmt" />
+    <button onclick="binhLuan('@Model.MaPhim')">Binh luan</button>
+</section>
+
+<section id="dsbl">
+
+</section>
+
+
+<script>
+    const vote = (maPhim) => {
+
+        var inputVal = $('#danhgia').val();
+
+        if ('@HttpContextAccessor.HttpContext.Session.GetString("maKH")') {
+            $.ajax({
+                type: 'PUT',
+
+                url: `https://localhost:7142/api/phimapi/vote?maphim=${maPhim}&diemvote=${inputVal}`,
+
+                dataType: 'json',
+
+                success: function (data) {
+                    alert("đánh giá thành công");
+                    location.reload();
+                },
+                Error: function (xhr) {
+                    alert(xhr.responseText);
+                }
+            })
+        } else {
+            alert("Bạn phải đăng nhập trước")
+        }
+
+    }
+
+
+    const binhLuan = (maPhim) => {
+
+        var str = "";
+
+        var cmt = $('#cmt').val();
+        console.log(cmt)
+
+        if ('@HttpContextAccessor.HttpContext.Session.GetString("maKH")') {
+            console.log('@HttpContextAccessor.HttpContext.Session.GetString("maKH")');
+            $.ajax({
+                type: 'POST',
+
+                url: `https://localhost:7142/api/phimapi/binhluan?maphim=${maPhim}&makh=${'@HttpContextAccessor.HttpContext.Session.GetString("maKH")'}&cmt=${cmt}`,
+
+                dataType: 'json',
+
+                success: function (data) {
+                    alert("đánh giá thành công");
+                },
+                Error: function (xhr) {
+                    alert(xhr.responseText);
+                }
+            })
+        } else {
+            alert("Bạn phải đăng nhập trước")
+        }
+
+
+    }
+
+
+    const showBinhLuan = () => {
+        var str = ""
+        $.ajax({
+            type: 'GET',
+
+            url: `https://localhost:7142/api/phimapi/getbinhluan?maphim=${'@Model.MaPhim'}`,
+
+            dataType: 'json',
+
+            success: function (data) {
+                $.each(data, function (key, val){
+                    str += `<p>${val}</p>`
+                })
+                $('#dsbl').html(str);
+            },
+            Error: function (xhr) {
+                alert(xhr.responseText);
+            }
+        })
+    }
+
+    showBinhLuan();
+</script>

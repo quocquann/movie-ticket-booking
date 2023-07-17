@@ -1,0 +1,105 @@
+﻿@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    ViewData["Title"] = "DatVe";
+    Layout = "~/Views/Shared/_LayoutMovefix.cshtml";
+}
+
+@*@model List<SuatChieu>*@
+
+
+<section class="movie-details-area" data-background="../MoveFix/img/bg/movie_details_bg.jpg" style="background-image: url(&quot;img/bg/movie_details_bg.jpg&quot;);">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="section-title title-style-three text-center mb-70">
+                    <span class="sub-title">our pricing plans</span>
+                    <h2 class="title">Đặt vé</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="row justify-content-center mb-150">
+            <div class="md-form md-outline input-with-post-icon datepicker col-lg-6" id="customDays">
+                <input oninput="HienThiSuatChieu('@ViewBag.maPhim')" placeholder="Chọn ngày" type="date" class="form-control" id="datepicker">
+            </div>
+        </div>
+
+        <div class="pricing-box-wrap">
+            <div id="suatChieu" class="row justify-content-center">
+
+              
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+
+
+
+    function HienThiSuatChieu(maPhim) {
+        var str = "";
+
+        let ngayChieu = $('#datepicker').val()
+        let lst = ngayChieu.split('-')
+        ngayChieu = lst[1] + '/' + lst[2] + '/' + lst[0] + ''
+
+        
+        if (new Date(ngayChieu).getTime() >= Date.now()) {
+            $.ajax({
+                type: 'GET',
+
+                url: `https://localhost:7142/api/phimapi/suatchieu?maphim=${maPhim}&ngaychieu=${ngayChieu}`,
+
+                dataType: 'json',
+
+                success: function (data) {
+                    console.log(data)
+                    if(data.length > 0){
+                        $.each(data, function (key, val) {
+                            console.log(val)
+                            console.log(val.ngayChieu.split('T')[0])
+                            let lst = val.ngayChieu.split('T')[0].split('-')
+                            let ngay = lst[2] + '/' + lst[1] + '/' + lst[0] + ''
+
+                            let gioBatDau = val.gioBatDau.split(':')[0] + ':' + val.gioBatDau.split(':')[1]
+                            let gioKetThuc = val.gioKetThuc.split(':')[0] + ':' + val.gioKetThuc.split(':')[1]
+
+                            str += `<div class="col-lg-4 col-md-6 col-sm-8">
+                                    <div class="pricing-box-item mb-30">
+                                    <div class="pricing-top">
+                                    <h5>${val.tenRap}</h5>
+                                    <h6>${val.tenPhongChieu}</h6>
+                                    <div class="price">
+                                        <p style="color:#14141D; font-weight:700">${ngay}</p>
+                                        <span>Từ ${gioBatDau}</span>
+                                        <span> Đến ${gioKetThuc}</span>
+                                    </div>
+                                    </div>
+
+                                    <div class="pricing-btn">
+                                    <a href="chonghe?masuatchieu=${val.maSuatChieu}" class="btn">Buy Now</a>
+                                    </div>
+                                    </div>
+                                    </div>`
+                        });
+                    }
+                    else {
+                        str = "Không có suất chiếu nào"
+                    }
+                    
+                    $('#suatChieu').html(str);
+                },
+                Error: function (xhr) {
+                    alert(xhr.responseText);
+                }
+            })
+        }
+        else {
+            $('#suatChieu').html('');
+        }
+    }
+</script>
+
+
+

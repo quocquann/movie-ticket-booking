@@ -1,0 +1,49 @@
+﻿
+body {
+}
+
+.seat {
+    width: 50px;
+    height: 50px;
+    line-height: 50px;
+    font-size: 16px;
+    border-radius: 50%;
+    color: #171d22;
+    text-align: center;
+    cursor: pointer;
+    transition: 1s ease;
+    border: none;
+    background: #e4d804;
+}
+
+.seat:hover {
+    background: #171d22;
+    color: #fff;
+}
+
+.seat.booked {
+    background: #cf2823;
+}
+
+.screen {
+    user-select: none;
+    -moz-user-select: none;
+    background: #12151e none repeat scroll 0 0;
+    border: 2px solid #e4d804;
+    border-radius: 50px;
+    color: #e3dfdf;
+    cursor: pointer;
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    line-height: 1.5;
+    margin-bottom: 0;
+    padding: 16px 34px;
+    text-align: center;
+    text-transform: uppercase;
+    touch-action: manipulation;
+    transition: all 0.3s ease 0s;
+    vertical-align: middle;
+    white-space: nowrap;
+}

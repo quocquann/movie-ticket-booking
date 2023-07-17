@@ -1,0 +1,25 @@
+﻿
+@model Phim
+
+<div class="movie-item mb-50">
+    <div class="movie-poster" >
+        <a asp-action="chitietphim" asp-route-maphim="@Model.MaPhim">
+            <img style="display: block;" width:"303px" height="430px" src=@Url.Content("../imagesPhim/" + Model.Anh) alt="">
+        </a>
+    </div>
+    <div class="movie-content">
+        <div class="top" style="min-height: 40px">
+            <h5 class="title"><a asp-action="chitietphim" asp-route-maphim="@Model.MaPhim">@Model.TenPhim</a></h5>
+            <span class="date">@Model.ThoiGianKhoiChieu.Value.ToString("dd/MM/yyyy")</span>
+        </div>
+        <div class="bottom">
+            <ul>
+                <li><span class="quality">HD</span></li>
+                <li>
+                    <span class="duration"><i class="far fa-clock"></i> @Model.ThoiLuong.Value min</span>
+                    <span class="rating"><i class="fas fa-thumbs-up"></i> @Model.DaoDien</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
